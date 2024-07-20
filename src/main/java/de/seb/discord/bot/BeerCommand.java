@@ -80,7 +80,7 @@ public class BeerCommand extends ListenerAdapter {
 
     private List<Discount> fetchOffers(String zip) {
         try {
-            HttpRequest request = HttpRequest.newBuilder(new URI(url.replace("$ZIP$", zip))).GET().build();
+            HttpRequest request = HttpRequest.newBuilder(new URI(url.replace("%ZIP%", zip))).GET().build();
             HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
             Object body = response.body();
             RestResponse restResponse = gson.fromJson((String) body, RestResponse.class);
