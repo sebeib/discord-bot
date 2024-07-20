@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 public class BeerCommand extends ListenerAdapter {
 
     private final HttpClient client;
-    private final HttpRequest request;
     private final Gson gson;
+    private final String url;
 
     private static final String TEMPLATE_STORE = """
             ## 🛒   %s
@@ -48,17 +48,22 @@ public class BeerCommand extends ListenerAdapter {
 
     public BeerCommand(@Value("${http.beer-service}") String url) throws URISyntaxException {
         client = HttpClient.newBuilder().build();
-        request = HttpRequest.newBuilder(new URI(url))
-                .GET()
-                .build();
         gson = Converters.registerAll(new GsonBuilder()).create();
+        this.url = url;
     }
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if(event.getName().equals(SlashCommands.BEER.value())) {
+            String zipCodeString = event.getOption("input").getAsString();
+
+            if(zipCodeString == null) {
+                event.getHook().sendMessage("Keine PLZ angegeben.").queue();
+                return;
+            }
+
             event.deferReply().queue();
-            List<Discount> offers = fetchOffers();
+            List<Discount> offers = fetchOffers(zipCodeString);
             String message = buildMessage(offers);
             event.getHook().sendMessage(message).queue();
         }
@@ -73,8 +78,9 @@ public class BeerCommand extends ListenerAdapter {
                 .collect(Collectors.joining());
     }
 
-    private List<Discount> fetchOffers() {
+    private List<Discount> fetchOffers(String zip) {
         try {
+            HttpRequest request = HttpRequest.newBuilder(new URI(url.replace("$ZIP$", zip))).GET().build();
             HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
             Object body = response.body();
             RestResponse restResponse = gson.fromJson((String) body, RestResponse.class);
