@@ -32,7 +32,7 @@ public class Bot {
         Guild server = jda.getGuildById(channel);
         server.updateCommands().addCommands(
                 Commands.slash(SlashCommands.BEER.value(), "Lokale Bierangebote")
-                        .addOption(OptionType.INTEGER, "PLZ", "Postleitzahl")
+                        .addOption(OptionType.STRING, "plz", "Postleitzahl")
         ).queue();
     }
 

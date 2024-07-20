@@ -55,7 +55,7 @@ public class BeerCommand extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if(event.getName().equals(SlashCommands.BEER.value())) {
-            int zip = event.getOption("PLZ").getAsInt();
+            String zip = event.getOption("plz").getAsString();
 
             event.deferReply().queue();
             List<Discount> offers = fetchOffers(zip);
@@ -73,7 +73,7 @@ public class BeerCommand extends ListenerAdapter {
                 .collect(Collectors.joining());
     }
 
-    private List<Discount> fetchOffers(int zip) {
+    private List<Discount> fetchOffers(String zip) {
         try {
             HttpRequest request = HttpRequest.newBuilder(new URI(url.replace("%ZIP%", String.valueOf(zip)))).GET().build();
             HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
