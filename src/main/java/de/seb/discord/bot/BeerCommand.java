@@ -55,15 +55,10 @@ public class BeerCommand extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if(event.getName().equals(SlashCommands.BEER.value())) {
-            String zipCodeString = event.getOption("input").getAsString();
-
-            if(zipCodeString == null) {
-                event.getHook().sendMessage("Keine PLZ angegeben.").queue();
-                return;
-            }
+            int zip = event.getOption("PLZ").getAsInt();
 
             event.deferReply().queue();
-            List<Discount> offers = fetchOffers(zipCodeString);
+            List<Discount> offers = fetchOffers(zip);
             String message = buildMessage(offers);
             event.getHook().sendMessage(message).queue();
         }
@@ -78,9 +73,9 @@ public class BeerCommand extends ListenerAdapter {
                 .collect(Collectors.joining());
     }
 
-    private List<Discount> fetchOffers(String zip) {
+    private List<Discount> fetchOffers(int zip) {
         try {
-            HttpRequest request = HttpRequest.newBuilder(new URI(url.replace("%ZIP%", zip))).GET().build();
+            HttpRequest request = HttpRequest.newBuilder(new URI(url.replace("%ZIP%", String.valueOf(zip)))).GET().build();
             HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
             Object body = response.body();
             RestResponse restResponse = gson.fromJson((String) body, RestResponse.class);
