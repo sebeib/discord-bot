@@ -9,6 +9,8 @@ import de.seb.discord.domain.beer.RestResponse;
 import net.dv8tion.jda.api.entities.templates.Template;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 @Component
 public class BeerCommand extends ListenerAdapter {
 
+    private static final Logger LOG = LoggerFactory.getLogger(BeerCommand.class);
     private final HttpClient client;
     private final Gson gson;
     private final String url;
@@ -59,6 +62,7 @@ public class BeerCommand extends ListenerAdapter {
 
             event.deferReply().queue();
             List<Discount> offers = fetchOffers(zip);
+            LOG.info("Fetched offers: {}", gson.toJson(offers));
             List<String> message = buildMessage(offers);
             message.forEach(m -> event.getHook().sendMessage(m).queue());
         }
