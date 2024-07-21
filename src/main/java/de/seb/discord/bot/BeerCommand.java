@@ -79,7 +79,9 @@ public class BeerCommand extends ListenerAdapter {
 
     private List<Discount> fetchOffers(String zip) {
         try {
-            HttpRequest request = HttpRequest.newBuilder(new URI(url.replace("%ZIP%", String.valueOf(zip)))).GET().build();
+            String fetchurl = url.replace("%ZIP%", String.valueOf(zip));
+            LOG.info("Fetching url {}", fetchurl);
+            HttpRequest request = HttpRequest.newBuilder(new URI(fetchurl)).GET().build();
             HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
             Object body = response.body();
             RestResponse restResponse = gson.fromJson((String) body, RestResponse.class);
