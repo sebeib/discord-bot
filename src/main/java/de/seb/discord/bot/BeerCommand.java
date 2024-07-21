@@ -59,18 +59,18 @@ public class BeerCommand extends ListenerAdapter {
 
             event.deferReply().queue();
             List<Discount> offers = fetchOffers(zip);
-            String message = buildMessage(offers);
-            event.getHook().sendMessage(message).queue();
+            List<String> message = buildMessage(offers);
+            message.forEach(m -> event.getHook().sendMessage(m).queue());
         }
     }
 
-    private String buildMessage(List<Discount> discounts) {
+    private List<String> buildMessage(List<Discount> discounts) {
         return discounts.stream()
                 .map(discount -> TEMPLATE_STORE.formatted(
                         discount.store(),
                         discount.offers().stream().map(offer -> TEMPLATE_OFFER.formatted(offer.brand(), offer.description(), offer.price(), dateFormat.format(offer.from()), dateFormat.format(offer.to())))
                                 .collect(Collectors.joining(""))))
-                .collect(Collectors.joining());
+                .toList();
     }
 
     private List<Discount> fetchOffers(String zip) {
