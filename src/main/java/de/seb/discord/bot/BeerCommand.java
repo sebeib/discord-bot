@@ -8,6 +8,7 @@ import de.seb.discord.domain.beer.Discount;
 import de.seb.discord.domain.beer.RestResponse;
 import net.dv8tion.jda.api.entities.templates.Template;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,4 +91,5 @@ public class BeerCommand extends ListenerAdapter {
             throw new RuntimeException(e);
         }
     }
+
 }
