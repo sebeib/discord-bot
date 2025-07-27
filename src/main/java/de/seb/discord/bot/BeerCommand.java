@@ -25,7 +25,12 @@ import java.text.DateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static de.seb.discord.bot.SlashCommands.BEER;
+import static de.seb.discord.bot.SlashCommands.SPEZI;
 
 @Component
 public class BeerCommand extends ListenerAdapter {
@@ -58,15 +63,19 @@ public class BeerCommand extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if(event.getName().equals(SlashCommands.BEER.value())) {
-            String zip = event.getOption("plz").getAsString();
+        Optional<SlashCommands> command = SlashCommands.find(event.getName());
 
-            event.deferReply().queue();
-            List<Discount> offers = fetchOffers(zip);
-            LOG.info("Fetched offers: {}", gson.toJson(offers));
-            List<String> message = buildMessage(offers);
-            message.forEach(m -> event.getHook().sendMessage(m).queue());
+        if(command.isEmpty()) {
+            return;
         }
+
+        String zip = event.getOption("plz").getAsString();
+
+        event.deferReply().queue();
+        List<Discount> offers = fetchOffers(zip, command.get().getQuery());
+        LOG.info("Fetched offers: {}", gson.toJson(offers));
+        List<String> message = buildMessage(offers);
+        message.forEach(m -> event.getHook().sendMessage(m).queue());
     }
 
     private List<String> buildMessage(List<Discount> discounts) {
@@ -78,9 +87,9 @@ public class BeerCommand extends ListenerAdapter {
                 .toList();
     }
 
-    private List<Discount> fetchOffers(String zip) {
+    private List<Discount> fetchOffers(String zip, String query) {
         try {
-            String fetchurl = url.replace("%ZIP%", String.valueOf(zip));
+            String fetchurl = url.replace("%ZIP%", String.valueOf(zip)).replace("%QUERY%", query);
             LOG.info("Fetching url {}", fetchurl);
             HttpRequest request = HttpRequest.newBuilder(new URI(fetchurl)).GET().build();
             HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());

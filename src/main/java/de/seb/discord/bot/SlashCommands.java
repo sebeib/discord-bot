@@ -1,16 +1,31 @@
 package de.seb.discord.bot;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public enum SlashCommands {
 
-    BEER("bier");
+    BEER("bier", "beer"),
+    SPEZI("spezi", "spezi");
 
-    private final String value;
+    private final String name;
+    private final String query;
 
-    SlashCommands(String value) {
-        this.value = value;
+    SlashCommands(String value, String query) {
+        this.name = value;
+        this.query = query;
     }
 
-    public String value() {
-        return value;
+    public String getName() {
+        return name;
+    }
+    public String getQuery() {
+        return query;
+    }
+
+    public static Optional<SlashCommands> find(String command) {
+        return Arrays.stream(values())
+                .filter(sc -> sc.getName().equals(command))
+                .findFirst();
     }
 }
