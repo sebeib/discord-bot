@@ -16,31 +16,17 @@ import java.util.EnumSet;
 @Component
 public class Bot {
 
-    @Value("${bot.token}")
-    private String token;
+    private final JDA jda;
 
-    @Value("${bot.channel}")
-    private String channel;
+    @Value("${bot.server}")
+    private String guildId;
 
-    @Value("${bot.activity}")
-    private String activity;
-
-    private final BeerCommand beerCommand;
-
-    public Bot(BeerCommand beerCommand) {
-        this.beerCommand = beerCommand;
+    public Bot(JDA jda) {
+        this.jda = jda;
     }
 
-    public void connect() throws InterruptedException {
-        JDA jda = JDABuilder.createDefault(token)
-                .enableIntents(GatewayIntent.GUILD_MEMBERS)
-                .setStatus(OnlineStatus.DO_NOT_DISTURB)
-                .setActivity(Activity.playing(activity))
-                .addEventListeners(beerCommand)
-                .build();
-        jda.awaitReady();
-
-        Guild server = jda.getGuildById(channel);
+    public void connect() {
+        Guild server = jda.getGuildById(guildId);
         server.updateCommands().addCommands(
                 Commands.slash(SlashCommands.BEER.getName(), "Lokale Bierangebote")
                         .addOption(OptionType.STRING, "plz", "Postleitzahl"),

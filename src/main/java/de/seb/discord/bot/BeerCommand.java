@@ -32,7 +32,6 @@ import java.util.stream.Stream;
 import static de.seb.discord.bot.SlashCommands.BEER;
 import static de.seb.discord.bot.SlashCommands.SPEZI;
 
-@Component
 public class BeerCommand extends ListenerAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(BeerCommand.class);
@@ -55,7 +54,7 @@ public class BeerCommand extends ListenerAdapter {
 
     private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
-    public BeerCommand(@Value("${http.beer-service}") String url) throws URISyntaxException {
+    public BeerCommand(String url) throws URISyntaxException {
         client = HttpClient.newBuilder().build();
         gson = Converters.registerAll(new GsonBuilder()).create();
         this.url = url;
@@ -75,19 +74,25 @@ public class BeerCommand extends ListenerAdapter {
         List<Discount> offers = fetchOffers(zip, command.get().getQuery());
         LOG.info("Fetched offers: {}", gson.toJson(offers));
         List<String> message = buildMessage(offers);
-        message.forEach(m -> event.getHook().sendMessage(m).queue());
+
+        if(message.isEmpty()) {
+            event.getHook().sendMessage(CringeMessages.getRandom(CringeMessages.NO_DEAL_INTROS)).queue();
+        } else {
+            message.forEach(m -> event.getHook().sendMessage(m).queue());
+        }
     }
 
-    private List<String> buildMessage(List<Discount> discounts) {
+    public List<String> buildMessage(List<Discount> discounts) {
         return discounts.stream()
                 .map(discount -> TEMPLATE_STORE.formatted(
                         discount.store(),
                         discount.offers().stream().map(offer -> TEMPLATE_OFFER.formatted(offer.brand(), offer.description(), offer.price(), dateFormat.format(offer.from()), dateFormat.format(offer.to())))
                                 .collect(Collectors.joining(""))))
+                .map(string -> string.length() > 2000 ? string.substring(0, 2000) : string)
                 .toList();
     }
 
-    private List<Discount> fetchOffers(String zip, String query) {
+    public List<Discount> fetchOffers(String zip, String query) {
         try {
             String fetchurl = url.replace("%ZIP%", String.valueOf(zip)).replace("%QUERY%", query);
             LOG.info("Fetching url {}", fetchurl);
