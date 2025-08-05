@@ -23,6 +23,7 @@ public class SpeziScheduler {
     private final JDA jda;
     private final String channelId;
     private final String roleId;
+    private int lastResult = -1;
 
     public SpeziScheduler(BeerCommand beerCommand, JDA jda, @Value("${bot.discount.channel}") String channelId, @Value("${bot.discount.role}") String roleId) {
         this.beerCommand = beerCommand;
@@ -44,9 +45,17 @@ public class SpeziScheduler {
         List<Discount> discountList = beerCommand.fetchOffers("08060", SlashCommands.SPEZI.getQuery());
         List<String> discountMessageList = beerCommand.buildMessage(discountList);
 
-        if(!discountMessageList.isEmpty()) {
-            channel.sendMessage(role.getAsMention() + CringeMessages.getRandom(DEAL_INTROS)).queue();
-            discountMessageList.forEach(message -> channel.sendMessage(message).queue());
+        if(discountMessageList.hashCode() != lastResult) {
+            LOGGER.info("Sending {} discount messages", discountMessageList.size());
+            lastResult = discountMessageList.hashCode();
+            if(!discountMessageList.isEmpty()) {
+                channel.sendMessage(role.getAsMention() + CringeMessages.getRandom(DEAL_INTROS)).queue();
+                discountMessageList.forEach(message -> channel.sendMessage(message).queue());
+            } else {
+                LOGGER.info("No discounts found.");
+            }
+        } else {
+            LOGGER.info("Same result as yesterday. Skipping.");
         }
     }
 
