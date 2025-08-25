@@ -7,22 +7,22 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SpeziScheduler {
+public class MonsterScheduler {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(SpeziScheduler.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(MonsterScheduler.class);
 
     private final String channelId;
     private final Scheduler scheduler;
 
-    public SpeziScheduler(@Value("${bot.discount.channel.spezi}") String channelId, Scheduler scheduler) {
+    public MonsterScheduler(@Value("${bot.discount.channel.monster}") String channelId, Scheduler scheduler) {
         this.scheduler = scheduler;
         this.channelId = channelId;
     }
 
     @Scheduled(cron = "${bot.discount.cron}")
     public void run() {
-        LOGGER.info("SpeziScheduler started");
-        scheduler.run(channelId, SlashCommands.SPEZI);
+        LOGGER.info("MonsterScheduler started");
+        scheduler.run(channelId, SlashCommands.MONSTER);
     }
 
 }

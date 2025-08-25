@@ -6,7 +6,8 @@ import java.util.Optional;
 public enum SlashCommands {
 
     BEER("bier", "beer"),
-    SPEZI("spezi", "spezi");
+    SPEZI("spezi", "spezi"),
+    MONSTER("monster", "monster");
 
     private final String name;
     private final String query;
