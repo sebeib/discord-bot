@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import java.util.List;
 import static de.seb.discord.bot.CringeMessages.DEAL_INTROS;
 
 @Component
+@Scope("prototype")
 public class Scheduler {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
