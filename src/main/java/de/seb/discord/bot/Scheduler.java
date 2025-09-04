@@ -16,7 +16,6 @@ import java.util.List;
 import static de.seb.discord.bot.CringeMessages.DEAL_INTROS;
 
 @Component
-@Scope("prototype")
 public class Scheduler {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
@@ -24,12 +23,13 @@ public class Scheduler {
     private final BeerCommand beerCommand;
     private final JDA jda;
     private final String roleId;
-    private int lastResult = -1;
+    private final ResultStore resultStore;
 
-    public Scheduler(BeerCommand beerCommand, JDA jda, @Value("${bot.discount.role}") String roleId) {
+    public Scheduler(BeerCommand beerCommand, JDA jda, @Value("${bot.discount.role}") String roleId, ResultStore resultStore) {
         this.beerCommand = beerCommand;
         this.jda = jda;
         this.roleId = roleId;
+        this.resultStore = resultStore;
     }
 
     public void run(String channelId, SlashCommands command) {
@@ -44,9 +44,13 @@ public class Scheduler {
         List<Discount> discountList = beerCommand.fetchOffers("08060", command.getQuery());
         List<String> discountMessageList = beerCommand.buildMessage(discountList);
 
+        final int lastResult = resultStore.get(command);
+        LOGGER.info("{} last result: {}", command.getQuery(), lastResult);
+        LOGGER.info("{} this result: {}", command.getQuery(), discountMessageList.hashCode());
+
         if(discountMessageList.hashCode() != lastResult) {
             LOGGER.info("Sending {} discount messages", discountMessageList.size());
-            lastResult = discountMessageList.hashCode();
+            resultStore.put(command, discountMessageList);
             if(!discountMessageList.isEmpty()) {
                 channel.sendMessage(role.getAsMention() + CringeMessages.getRandom(DEAL_INTROS)).queue();
                 discountMessageList.forEach(message -> channel.sendMessage(message).queue());
